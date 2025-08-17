@@ -1,0 +1,4 @@
+1. git branch 
+2. git checkout -b working-app
+3. git push origin working-app
+4. git status

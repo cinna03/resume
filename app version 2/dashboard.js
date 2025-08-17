@@ -17,19 +17,27 @@ class DashboardManager {
     }
 
     checkAuthStatus() {
-        if (!authManager.isUserAuthenticated()) {
-            window.location.href = 'login.html';
-            return;
-        }
-        this.updateUserInfo();
+        // Wait a bit for Supabase auth to initialize
+        setTimeout(() => {
+            console.log('Checking auth status...', window.supabaseAuthManager);
+            if (!window.supabaseAuthManager || !window.supabaseAuthManager.isUserAuthenticated()) {
+                console.log('User not authenticated, redirecting to login');
+                window.location.href = 'login.html';
+                return;
+            }
+            console.log('User authenticated, updating user info');
+            this.updateUserInfo();
+        }, 2000);
     }
 
     updateUserInfo() {
-        const user = authManager.getCurrentUser();
-        if (user) {
-            const welcomeTitle = document.querySelector('.dashboard-header .content-title');
-            if (welcomeTitle) {
-                welcomeTitle.textContent = `Welcome back, ${user.firstName}!`;
+        if (window.supabaseAuthManager) {
+            const user = window.supabaseAuthManager.getCurrentUser();
+            if (user) {
+                const welcomeTitle = document.querySelector('.dashboard-header .content-title');
+                if (welcomeTitle) {
+                    welcomeTitle.textContent = `Welcome back, ${user.firstName}!`;
+                }
             }
         }
     }
@@ -219,8 +227,15 @@ function showNotification(message, type = 'info') {
     }
 }
 
-// Initialize dashboard
-const dashboardManager = new DashboardManager();
+// Initialize dashboard - wait for Supabase auth to be ready
+let dashboardManager;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Wait a bit for Supabase auth to initialize
+    setTimeout(() => {
+        dashboardManager = new DashboardManager();
+    }, 1500);
+});
 
 // Add dashboard-specific styles
 const dashboardStyles = document.createElement('style');
